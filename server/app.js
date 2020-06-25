@@ -96,18 +96,37 @@ app.post('/signup', (req, res, next) => {
     // then redirect to the homepage
     .then(() => {
       res.redirect('/');
-      res.sendStatus(200);
     })
     .catch(err => {
-      console.log(`HERE IS ERROR!! ${err}`);
-      res.sendStatus(404);
+      console.log(`Error Caught at Signup - ${err}`);
     });
 });
 
-// app.post('/login',
-//   (req, res, next) => {
-
-//   });
+app.post('/login',
+  (req, res, next) => {
+    var username = req.body.username;
+    var attemptedPassword = req.body.password;
+    return models.Users.get({ username })
+      .then(userData => {
+        if (!userData) {
+          console.log('User does not exist, staying at login page');
+          res.redirect('/login');
+        }
+        return models.Users.compare(attemptedPassword, userData.password, userData.salt);
+      })
+      .then((loggedIn) => {
+        if (loggedIn) {
+          res.redirect('/');
+          console.log('User logged in successfully!');
+        } else {
+          console.log('Credentials incorrect.. Please try again');
+          res.redirect('/login');
+        }
+      })
+      .catch(err => {
+        console.log(`Error Caught at Login - ${err}`);
+      });
+  });
 
 
 /************************************************************/
