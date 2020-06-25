@@ -4,34 +4,45 @@ const Promise = require('bluebird');
 module.exports.createSession = (req, res, next) => {
   // updating session table when user logs in?
   // check if session has hash... crosscheck with DB
-  //
-  // console.log('line 5 ------>', req);
-  var objCookie = req.cookies; // {}
+  var cookie = req.cookies.shortlyid;
   // if there are cookies
-  if (objCookie.shortlyid) {
-    // console.log('HI!');
-    var hash = req.cookies.shortlyid;
-    console.log('HI!', hash);
-    console.log('session exists!!***', req.session);
+  if (!cookie) {
+    // no cookie = create new session
+    models.Sessions.create()
+      .then(results => {
+        return models.Sessions.get({ id: results.insertId });
+      })
+      .then(sessionData => {
+        // assign session table data to session oject on request
+        req.session = sessionData;
+        // set new cookie on the response i.e. session.hash
+        res.cookie('shortlyid', req.session.hash);
+        next();
+      })
+      .catch(err => {
+        console.log('Error! ', err);
+      });
   }
-  // if no cookies
-  // create a session
-  models.Sessions.create()
-    // initialized a session
-    .then(data => { return models.Sessions.get({ id: data.insertId }); })
-    // assigns a session object to the request if a session already exists
+  var hash = cookie;
+  return models.Sessions.get({ hash })
     .then(sessionData => {
-      req.session = sessionData;
-      console.log(req.session);
-      // sets a new cookie on the response
-      res.cookie('shortlyid', req.session.hash);
+      if (sessionData) {
+        req.session = sessionData;
+      }
+      // res.clearCookie('shortlyid');
+      // models.Sessions.create()
+      //   .then(results => {
+      //     return models.Sessions.get({ id: results.insertId });
+      //   })
+      //   .then(sessionData => {
+      //     res.cookie('shortlyid', sessionData.hash);
+      //   });
+
       next();
+    })
+    .catch(err => {
+      console.log('Error! ', err);
     });
-  // if we have cookies
-
-
-
-
 
 };
 
