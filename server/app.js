@@ -95,6 +95,11 @@ app.post('/signup', (req, res, next) => {
       // if not create a new user
       return models.Users.create({ username, password });
     })
+    .then(results => {
+      console.log('User created successfully!');
+      // console.log('hash---->', req.session.hash)
+      return models.Sessions.update({ hash: req.session.hash }, { userId: results.insertId });
+    })
     // then redirect to the homepage
     .then(() => {
       res.redirect('/');
@@ -129,6 +134,23 @@ app.post('/login',
         console.log(`Error Caught at Login - ${err}`);
       });
   });
+
+
+app.get('/logout',
+  (req, res, next) => {
+    var hash = req.cookies.shortlyid;
+    return models.Sessions.delete({ hash })
+      .then(() => {
+        console.log('Deleted successfully');
+        res.clearCookie('shortlyid');
+        res.redirect('/login');
+      })
+      .catch((err) => {
+        console.log(`Error Caught at logout - ${err}`);
+      });
+    next();
+  });
+
 
 
 /************************************************************/
