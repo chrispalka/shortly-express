@@ -53,5 +53,12 @@ module.exports.createSession = (req, res, next) => {
 /************************************************************/
 
 module.exports.verifySession = (req, res, next) => {
-
+  var session = req.session;
+  console.log('SESSION!', session);
+  if (models.Sessions.isLoggedIn(session)) {
+  } else {
+    // res.redirect('/login');
+    console.log('no session');
+  }
+  next();
 };

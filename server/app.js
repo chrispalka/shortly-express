@@ -17,19 +17,20 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../public')));
 app.use(cookieParser);
 app.use(Auth.createSession);
+app.use(Auth.verifySession);
 
 
-app.get('/',
+app.get('/', Auth.verifySession,
   (req, res) => {
     res.render('index');
   });
 
-app.get('/create',
+app.get('/create', Auth.verifySession,
   (req, res) => {
     res.render('index');
   });
 
-app.get('/links',
+app.get('/links', Auth.verifySession,
   (req, res, next) => {
     models.Links.getAll()
       .then(links => {
@@ -80,6 +81,21 @@ app.post('/links',
 /************************************************************/
 // Write your authentication routes here
 /************************************************************/
+app.get('/logout',
+  (req, res, next) => {
+    var hash = req.cookies.shortlyid;
+    return models.Sessions.delete({ hash })
+      .then(() => {
+        console.log('Deleted successfully');
+        res.clearCookie('shortlyid');
+        res.redirect('/');
+      })
+      .catch((err) => {
+        console.log(`Error Caught at logout - ${err}`);
+      });
+    next();
+  });
+
 app.post('/signup', (req, res, next) => {
   var username = req.body.username;
   var password = req.body.password;
@@ -134,25 +150,6 @@ app.post('/login',
         console.log(`Error Caught at Login - ${err}`);
       });
   });
-
-
-app.get('/logout',
-  (req, res, next) => {
-    var hash = req.cookies.shortlyid;
-    return models.Sessions.delete({ hash })
-      .then(() => {
-        console.log('Deleted successfully');
-        res.clearCookie('shortlyid');
-        res.redirect('/login');
-      })
-      .catch((err) => {
-        console.log(`Error Caught at logout - ${err}`);
-      });
-    next();
-  });
-
-
-
 /************************************************************/
 // Handle the code parameter route last - if all other routes fail
 // assume the route is a short code and try and handle it here.
