@@ -81,6 +81,14 @@ app.post('/links',
 /************************************************************/
 // Write your authentication routes here
 /************************************************************/
+app.get('/login', (req, res, next) => {
+  res.render('login');
+});
+
+app.get('/signup', (req, res, next) => {
+  res.render('signup');
+});
+
 app.get('/logout',
   (req, res, next) => {
     var hash = req.cookies.shortlyid;
@@ -89,6 +97,7 @@ app.get('/logout',
         console.log('Deleted successfully');
         res.clearCookie('shortlyid');
         res.redirect('/login');
+        return;
       })
       .catch((err) => {
         console.log(`Error Caught at logout - ${err}`);
@@ -140,7 +149,6 @@ app.post('/login',
       })
       .then((loggedIn) => {
         if (loggedIn) {
-
           models.Sessions.update({hash: req.session.hash}, {userId: userId});
           res.redirect('/');
           console.log('User logged in successfully!');

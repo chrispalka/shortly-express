@@ -29,12 +29,12 @@ module.exports.createSession = (req, res, next) => {
     models.Sessions.get({ hash })
       .then(sessionData => {
         if (sessionData) {
-          console.log('COOKIE VERIFIED!');
+          // console.log('COOKIE VERIFIED!');
           // If matching - set the session object to the return sessionData
           // console.log('REQ.SESSION --->', req.session);
           req.session = sessionData;
 
-          console.log('SESSION DATA --->', sessionData);
+          // console.log('SESSION DATA --->', sessionData);
           next();
           // if sessionData doesn't exist
         } else {
@@ -60,11 +60,10 @@ module.exports.verifySession = (req, res, next) => {
   var session = req.session;
   // console.log('VERIFY SESSION! -----> ', session);
   if (models.Sessions.isLoggedIn(req.session)) {
-    console.log('USER HAS SESSION!.. REDIRECT TO INDEX', req.session);
-
+    // console.log('USER HAS SESSION!.. REDIRECT TO INDEX', req.session);
+    next();
   } else {
     res.redirect('/login');
-    console.log('NO SESSION', req.session);
+    // console.log('NO SESSION', req.session);
   }
-  next();
 };
