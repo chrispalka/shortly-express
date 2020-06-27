@@ -121,7 +121,7 @@ app.post('/signup', (req, res, next) => {
       return models.Users.create({ username, password });
     })
     .then(results => {
-      console.log('User created successfully!');
+      console.log(' app.js line 124 User created successfully!');
       return models.Sessions.update({ hash: req.session.hash }, { userId: results.insertId });
     })
     // then redirect to the homepage

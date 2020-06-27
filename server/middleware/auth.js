@@ -31,10 +31,9 @@ module.exports.createSession = (req, res, next) => {
         if (sessionData) {
           // console.log('COOKIE VERIFIED!');
           // If matching - set the session object to the return sessionData
-          // console.log('REQ.SESSION --->', req.session);
           req.session = sessionData;
-
-          // console.log('SESSION DATA --->', sessionData);
+          // console.log('REQ.SESSION --->', req.session);
+          // console.log('SESSION DATA from auth.js line 36 --->', sessionData);
           next();
           // if sessionData doesn't exist
         } else {
