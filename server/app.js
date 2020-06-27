@@ -17,7 +17,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '../public')));
 app.use(cookieParser);
 app.use(Auth.createSession);
-app.use(Auth.verifySession);
+// app.use(Auth.verifySession);
 
 
 app.get('/', Auth.verifySession,
@@ -88,7 +88,7 @@ app.get('/logout',
       .then(() => {
         console.log('Deleted successfully');
         res.clearCookie('shortlyid');
-        res.redirect('/');
+        res.redirect('/login');
       })
       .catch((err) => {
         console.log(`Error Caught at logout - ${err}`);
@@ -113,7 +113,6 @@ app.post('/signup', (req, res, next) => {
     })
     .then(results => {
       console.log('User created successfully!');
-      // console.log('hash---->', req.session.hash)
       return models.Sessions.update({ hash: req.session.hash }, { userId: results.insertId });
     })
     // then redirect to the homepage
@@ -128,6 +127,7 @@ app.post('/signup', (req, res, next) => {
 app.post('/login',
   (req, res, next) => {
     var username = req.body.username;
+    var userId;
     var attemptedPassword = req.body.password;
     return models.Users.get({ username })
       .then(userData => {
@@ -135,10 +135,13 @@ app.post('/login',
           console.log('User does not exist, staying at login page');
           res.redirect('/login');
         }
+        userId = userData.id;
         return models.Users.compare(attemptedPassword, userData.password, userData.salt);
       })
       .then((loggedIn) => {
         if (loggedIn) {
+
+          models.Sessions.update({hash: req.session.hash}, {userId: userId});
           res.redirect('/');
           console.log('User logged in successfully!');
         } else {
@@ -146,6 +149,7 @@ app.post('/login',
           res.redirect('/login');
         }
       })
+
       .catch(err => {
         console.log(`Error Caught at Login - ${err}`);
       });

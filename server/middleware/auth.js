@@ -12,6 +12,7 @@ module.exports.createSession = (req, res, next) => {
       })
       .then(sessionData => {
         // assign session table data to session oject on request
+        // console.log('SESSION DATA', sessionData);
         req.session = sessionData;
         // set new cookie on the response i.e. session.hash
         res.cookie('shortlyid', req.session.hash);
@@ -28,9 +29,12 @@ module.exports.createSession = (req, res, next) => {
     models.Sessions.get({ hash })
       .then(sessionData => {
         if (sessionData) {
+          console.log('COOKIE VERIFIED!');
           // If matching - set the session object to the return sessionData
+          // console.log('REQ.SESSION --->', req.session);
           req.session = sessionData;
-          // console.log('SESSION DATA --->', sessionData);
+
+          console.log('SESSION DATA --->', sessionData);
           next();
           // if sessionData doesn't exist
         } else {
@@ -54,11 +58,13 @@ module.exports.createSession = (req, res, next) => {
 
 module.exports.verifySession = (req, res, next) => {
   var session = req.session;
-  console.log('SESSION!', session);
-  if (models.Sessions.isLoggedIn(session)) {
+  // console.log('VERIFY SESSION! -----> ', session);
+  if (models.Sessions.isLoggedIn(req.session)) {
+    console.log('USER HAS SESSION!.. REDIRECT TO INDEX', req.session);
+
   } else {
-    // res.redirect('/login');
-    console.log('no session');
+    res.redirect('/login');
+    console.log('NO SESSION', req.session);
   }
   next();
 };
